@@ -1,20 +1,19 @@
 
 const VerfiToken = (req, res) => {
-    res.send('verify token');
-    // try {
-    //     var accessToken = process.env.META_TOKEN;
-    //     var token = req.query["hub.verify_token"];
-    //     var challenge = req.query["hub.challenge"];
+    try {
+        var accessToken = process.env.META_TOKEN;
+        var token = req.query["hub.verify_token"];
+        var challenge = req.query["hub.challenge"];
 
-    //     if(challenge != null && token != null && token == accessToken) {
-    //         res.send(challenge);
-    //     } else {
-    //         res. status(400).send();
-    //     }
-    // }catch(e){
-    //     myConsole.log(e);
-    //     res. status(400).send();
-    // }
+        if(challenge != null && token != null && token == accessToken) {
+            res.send(challenge);
+        } else {
+            res. status(400).send();
+        }
+    }catch(e){
+        myConsole.log(e);
+        res. status(400).send();
+    }
 }
 
 
