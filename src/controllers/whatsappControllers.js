@@ -19,6 +19,7 @@ const VerfiToken = (req, res) => {
 
 
 const ReceivedMessage = (req, res) => {
+    console.log("olá mundo");
     try{
         var entry = (req.body["entry"])[0];
         var changes = (entry["changes"])[0];
