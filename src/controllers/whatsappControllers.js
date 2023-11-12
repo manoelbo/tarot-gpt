@@ -30,7 +30,7 @@ const ReceivedMessage = (req, res) => {
 
         console.log('messages:',messages);
        
-        var text = "Olá,\n\nSeja bem-vindo ao *Anti Audio Audio Club*. Somos um serviço e uma comunidade ```PREMIUM``` para pessoas que odeiam receber áudios no WhatsApp.\n\n*Como essa budega funciona:*\nSempre que você encaminhar ou enviar um áudio para este contato, nós o transcreveremos para você. Simples assim. \n\nNosso serviço está na fase beta do beta. Não confie na transcrição e não nos xingue.\n\nEstamos trabalhando duro para um mundo com menos áudios do WhatsApp.\n\n#vitórianaguerra"
+        var text = "Olá mundo! assinado: Zoltar Tarot IA";
         
         console.log('text:',text);
         console.log('number:',number);
