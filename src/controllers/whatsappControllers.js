@@ -25,6 +25,7 @@ const ReceivedMessage = (req, res) => {
         var changes = (entry["changes"])[0];
         var value = (changes["value"]);
         var messageObject = value["messages"];
+        var number = messages["from"];
 
         console.log('messageObject:',messageObject);
        
