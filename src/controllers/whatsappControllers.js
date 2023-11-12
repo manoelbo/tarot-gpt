@@ -19,19 +19,23 @@ const VerfiToken = (req, res) => {
 
 
 const ReceivedMessage = (req, res) => {
-    console.log("olá mundo");
-    try{
+    console.log("ReceivedMessage");
+    try {
         var entry = (req.body["entry"])[0];
         var changes = (entry["changes"])[0];
         var value = (changes["value"]);
         var messageObject = value["messages"];
+
+        console.log('messageObject:',messageObject);
        
         var text = "Olá,\n\nSeja bem-vindo ao *Anti Audio Audio Club*. Somos um serviço e uma comunidade ```PREMIUM``` para pessoas que odeiam receber áudios no WhatsApp.\n\n*Como essa budega funciona:*\nSempre que você encaminhar ou enviar um áudio para este contato, nós o transcreveremos para você. Simples assim. \n\nNosso serviço está na fase beta do beta. Não confie na transcrição e não nos xingue.\n\nEstamos trabalhando duro para um mundo com menos áudios do WhatsApp.\n\n#vitórianaguerra"
-                
+        
+        console.log('text:',text);
+        console.log('number:',number);
         whatsappService.SendMessageWhatsApp(text, number);
         res.send("EVENT_RECEIVED");
 
-    }catch(e){
+    } catch(e){
         res.send("EVENT_RECEIVED");
     }
 }
