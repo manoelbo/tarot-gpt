@@ -1,3 +1,4 @@
+const whatsappService = require("../services/whatsappServices");
 
 const VerfiToken = (req, res) => {
     try {
@@ -28,11 +29,12 @@ const ReceivedMessage = (req, res) => {
                 
         whatsappService.SendMessageWhatsApp(text, number);
         res.send("EVENT_RECEIVED");
-        
+
     }catch(e){
         res.send("EVENT_RECEIVED");
     }
 }
+
 
 module.exports = {
     VerfiToken,
