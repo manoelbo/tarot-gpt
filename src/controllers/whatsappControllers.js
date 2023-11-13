@@ -39,14 +39,15 @@ const ReceivedMessage = (req, res) => {
         const tarotCardsArray = Object.values(tarotReading);
 
     
+        console.log(tarotCardsArray);
 
-        let data;
+        let data; 
 
 
         if (userText === "leitura") {
             tarotCardsArray.forEach(card => {
                 // data = samples.SampleImage(number, card.image);
-                data = samples.SampleText(number, "olá mundo");
+                data = samples.SampleText(number, card.name);
                 console.log(data);
                 whatsappService.SendMessageWhatsApp(data);
             })

@@ -1,9 +1,9 @@
-function SampleText(textResponse, number){
+function SampleText(number, text){
     const data = JSON.stringify({
         messaging_product: "whatsapp",
         to: number,
         text: {
-          body: textResponse,
+          body: text,
         },
         type: "text",
       });
