@@ -1,6 +1,6 @@
 const whatsappService = require("../services/whatsappServices");
 const samples = require("../shared/sampleModels");
-const drawTarotCards = require("../cards/shuffleCards");
+const drawTarotCards = require("../services/tarotServices");
 
 const VerifyToken = (req, res) => {
     try {
@@ -46,8 +46,8 @@ const ReceivedMessage = (req, res) => {
 
         if (userText === "leitura") {
             tarotCardsArray.forEach(card => {
-                // data = samples.SampleImage(number, card.image);
-                data = samples.SampleText(number, card.name);
+                data = samples.SampleImage(number, card.image);
+                // data = samples.SampleText(number, card.name);
                 console.log(data);
                 whatsappService.SendMessageWhatsApp(data);
             })
