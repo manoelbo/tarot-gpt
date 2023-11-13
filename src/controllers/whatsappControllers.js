@@ -21,27 +21,33 @@ const VerifyToken = (req, res) => {
 
 
 const ReceivedMessage = (req, res) => {
-    console.log("ReceivedMessage");
     try {
+
         var entry = (req.body["entry"])[0];
         var changes = (entry["changes"])[0];
         var value = (changes["value"]);
         var messageObject = value["messages"];
         var messages = messageObject[0];
         var number = messages["from"];
+        var userText = messages.text.body;
 
-        console.log('messages:',messages);
+        
        
         var text = "Olá mundo! assinado: Zoltar Tarot IA";
 
         const tarotReading = drawTarotCards();
         const tarotCardsArray = Object.values(tarotReading);
 
+    
+
         let data;
 
-        if (text === "leitura") {
+
+        if (userText === "leitura") {
             tarotCardsArray.forEach(card => {
-                data = samples.SampleImage(number, card.image);
+                // data = samples.SampleImage(number, card.image);
+                data = samples.SampleText(number, "olá mundo");
+                console.log(data);
                 whatsappService.SendMessageWhatsApp(data);
             })
         }
