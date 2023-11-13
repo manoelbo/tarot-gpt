@@ -1,6 +1,8 @@
 const whatsappService = require("../services/whatsappServices");
+const samples = require("../shared/sampleModels");
+const drawTarotCards = require("../cards/shuffleCards");
 
-const VerfiToken = (req, res) => {
+const VerifyToken = (req, res) => {
     try {
         var accessToken = process.env.META_TOKEN;
         var token = req.query["hub.verify_token"];
@@ -15,7 +17,7 @@ const VerfiToken = (req, res) => {
         myConsole.log(e);
         res. status(400).send();
     }
-}
+};
 
 
 const ReceivedMessage = (req, res) => {
@@ -31,19 +33,26 @@ const ReceivedMessage = (req, res) => {
         console.log('messages:',messages);
        
         var text = "Olá mundo! assinado: Zoltar Tarot IA";
-        
-        console.log('text:',text);
-        console.log('number:',number);
-        whatsappService.SendMessageWhatsApp(text, number);
-        res.send("EVENT_RECEIVED");
 
-    } catch(e){
-        res.send("EVENT_RECEIVED");
-    }
-}
+        const tarotReading = drawTarotCards();
+        const tarotCardsArray = Object.values(tarotReading);
 
+        let data;
+
+        if (text === "leitura") {
+            tarotCardsArray.forEach(card => {
+                data = samples.SampleImage(number, card.image);
+                whatsappService.SendMessageWhatsApp(data);
+            })
+        }
+
+    res.send("EVENT_RECEIVED");
+  } catch (e) {
+    res.send("EVENT_RECEIVED");
+  }
+};
 
 module.exports = {
-    VerfiToken,
-    ReceivedMessage
-}
+  VerifyToken,
+  ReceivedMessage,
+};

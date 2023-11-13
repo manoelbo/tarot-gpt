@@ -3,7 +3,7 @@ const router = express.Router();
 const whatsAppController = require("../controllers/whatsappControllers");
 
 router
-.get("/", whatsAppController.VerfiToken)
+.get("/", whatsAppController.VerifyToken)
 .post("/", whatsAppController.ReceivedMessage)
 
 module.exports = router;
