@@ -4,9 +4,10 @@ const drawTarotCards = require("../services/tarotServices");
 
 const VerifyToken = (req, res) => {
     try {
-        var accessToken = process.env.META_TOKEN;
-        var token = req.query["hub.verify_token"];
-        var challenge = req.query["hub.challenge"];
+        // eslint-disable-next-line no-undef
+        const accessToken = process.env.META_TOKEN;
+        const token = req.query["hub.verify_token"];
+        let challenge = req.query["hub.challenge"];
 
         if(challenge != null && token != null && token == accessToken) {
             res.send(challenge);
@@ -14,7 +15,7 @@ const VerifyToken = (req, res) => {
             res. status(400).send();
         }
     }catch(e){
-        myConsole.log(e);
+        console.log(e);
         res. status(400).send();
     }
 };
@@ -23,17 +24,13 @@ const VerifyToken = (req, res) => {
 const ReceivedMessage = (req, res) => {
     try {
 
-        var entry = (req.body["entry"])[0];
-        var changes = (entry["changes"])[0];
-        var value = (changes["value"]);
-        var messageObject = value["messages"];
-        var messages = messageObject[0];
-        var number = messages["from"];
-        var userText = messages.text.body;
-
-        
-       
-        var text = "Olá mundo! assinado: Zoltar Tarot IA";
+        let entry = (req.body["entry"])[0];
+        let changes = (entry["changes"])[0];
+        let value = (changes["value"]);
+        let messageObject = value["messages"];
+        let messages = messageObject[0];
+        let number = messages["from"];
+        let userText = messages.text.body;
 
         const tarotReading = drawTarotCards();
         const tarotCardsArray = Object.values(tarotReading);
