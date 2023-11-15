@@ -22,7 +22,20 @@ function SampleImage(number, path){
       return data
 }
 
+function SampleAudio(number, path){
+  const data = JSON.stringify({
+      "messaging_product": "whatsapp",
+      "to": number,
+      "type": "audio",  
+      "audio": {
+          "link": path
+      }        
+  });
+  return data;
+}
+
 module.exports = {
   SampleText,
-  SampleImage
+  SampleImage,
+  SampleAudio
 }
