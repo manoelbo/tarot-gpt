@@ -3,5 +3,4 @@ npm-debug.log
 .DS_Store
 .env
 logs.txt
-serviceAccountKey.json
 /src/services/tmp/*
