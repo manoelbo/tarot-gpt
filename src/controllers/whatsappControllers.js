@@ -70,7 +70,7 @@ const ReceivedMessage = (req, res) => {
         } else {
             whatsappMessageStatus = samples.SampleText(number,  "Olá,\n\nSeja bem-vindo(a) ao *Zoltar Tarot IA*.\nSomos uma maneira acessível de você consultar a sabedoria do ```Tarot```.\n\n*Como funciona?:*\nPara fazer um consultar, é só você enviar uma mensagem que começa com 'pergunta:' \n\n*Exemplos:*\npergunta: Porque o meu crush parou de falar comigo?\npergunta: No que preciso prestar atenção nessa semana?\npergunta: Como vai ser o meu mês de outubro?\n\nDepois de enviar a sua pergunta corretamente, o Zoltar vai separa três cartas e relacionar o que saiu com a sua pergunta.\n\n*Aviso importante:* você tem o direito de consultar o Zoltar apenas uma vez por dia. Portanto, pense cuidadosamente na pergunta que deseja fazer.");
             SendMessageWhatsApp(whatsappMessageStatus);
-        };
+        }
 
        
 

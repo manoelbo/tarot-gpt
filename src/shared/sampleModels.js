@@ -8,7 +8,7 @@ function SampleText(number, text){
         type: "text",
       });
       return data
-};
+}
 
 function SampleImage(number, path){
     const data = JSON.stringify({
@@ -20,7 +20,7 @@ function SampleImage(number, path){
         },
       });
       return data
-};
+}
 
 module.exports = {
   SampleText,
