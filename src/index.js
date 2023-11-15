@@ -7,11 +7,14 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
 
+
 if (process.env.NODE_ENV !== "production") {
     require("dotenv").config();
 }
 
 const app = express();
+
+app.use('/public', express.static('../public'));
 
 const PORT = process.env.PORT || 3000;
 

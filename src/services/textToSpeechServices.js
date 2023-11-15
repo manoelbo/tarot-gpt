@@ -29,7 +29,7 @@ function textToSpeech(text) {
       // eslint-disable-next-line no-unused-vars
       res.on("end", function (chunk) {
         var body = Buffer.concat(chunks);
-        const fileName = path.join(__dirname, 'tmp', `audio_${new Date().getTime()}.ogg`);
+        const fileName = path.join(__dirname, '..', '..', 'public', 'audio', 'tmp', `audio_${new Date().getTime()}.ogg`);
         fs.writeFile(fileName, body, 'binary', function(err){
           if(err) {
             reject(err);
