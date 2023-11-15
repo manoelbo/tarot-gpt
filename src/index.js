@@ -2,6 +2,12 @@ const express = require("express");
 const apiRoute = require("./routes/routes");
 const admin = require('firebase-admin');
 const serviceAccount = require('../serviceAccountKey.json');
+const fs = require('fs');
+const path = '/app/src/services/tmp';
+
+fs.mkdir(path, { recursive: true }, (err) => {
+  if (err) throw err;
+});
 
 
 admin.initializeApp({
