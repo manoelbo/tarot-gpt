@@ -1,5 +1,6 @@
 const express = require("express");
 const apiRoute = require("./routes/routes");
+const path = require('path');
 const admin = require('firebase-admin');
 const serviceAccount = require('../serviceAccountKey.json');
 
@@ -14,7 +15,7 @@ if (process.env.NODE_ENV !== "production") {
 
 const app = express();
 
-app.use('/public', express.static('../public'));
+app.use('/public', express.static(path.join(__dirname, '..', '..', 'public')));
 
 const PORT = process.env.PORT || 3000;
 
