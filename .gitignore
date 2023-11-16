@@ -5,4 +5,3 @@ npm-debug.log
 logs.txt
 serviceAccountKey.json
 /src/services/tmp/*
-/public/audio/tmp/*
