@@ -10,11 +10,7 @@ if (process.env.NODE_ENV === "production") {
 } else {
     const serviceAccountFile = require('../serviceAccountKey.json');
     serviceAccount = serviceAccountFile;
-}
-
-if (process.env.NODE_ENV !== "production") {
     require("dotenv").config();
-    
 }
 
 admin.initializeApp({
