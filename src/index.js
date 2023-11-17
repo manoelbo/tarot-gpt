@@ -2,12 +2,13 @@ const express = require("express");
 const apiRoute = require("./routes/routes");
 const path = require('path');
 const admin = require('firebase-admin');
-const serviceAccountFile = require('../serviceAccountKey.json');
+
 let serviceAccount;
 
 if (process.env.NODE_ENV === "production") {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 } else {
+    const serviceAccountFile = require('../serviceAccountKey.json');
     serviceAccount = serviceAccountFile;
 }
 
