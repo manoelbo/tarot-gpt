@@ -94,6 +94,8 @@ async function sendChatGPTResponse(userText, tarotCardsArray, number) {
 
     } catch (error) {
       console.log(error);
+      const whatsappMessageStatus = samples.SampleText(number, "Ocorreu um erro ao consultar o Zoltar. Por favor, tente novamente.");
+      SendMessageWhatsApp(whatsappMessageStatus);
     }
 }
 
