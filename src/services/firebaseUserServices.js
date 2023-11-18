@@ -1,4 +1,4 @@
-const admin = require("../index");
+const admin = require('firebase-admin');
 
 async function createUserInFirebase(phoneNumber) {
   try {
@@ -28,6 +28,14 @@ async function createUserInFirebase(phoneNumber) {
   }
 }
 
+function formatToE164(phoneNumber) {
+  if (!phoneNumber.startsWith('+')) {
+      return '+' + phoneNumber;
+  }
+  return phoneNumber;
+}
+
 module.exports = {
   createUserInFirebase,
+  formatToE164,
 };
