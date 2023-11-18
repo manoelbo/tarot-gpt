@@ -3,6 +3,7 @@ const samples = require("../shared/sampleModels");
 const drawTarotCards = require("../services/tarotServices");
 const { createThreadOpenAI } = require("../services/openaiServices");
 const { textToSpeech } = require("../services/textToSpeechServices");
+const { createUserInFirebase} = require("../services/firebaseUserServices");
 
 const VerifyToken = (req, res) => {
     try {
@@ -22,8 +23,7 @@ const VerifyToken = (req, res) => {
     }
 };
 
-
-const ReceivedMessage = (req, res) => {
+const ReceivedMessage = async(req, res) => {
     try {
 
         let entry = (req.body["entry"])[0];
@@ -37,7 +37,7 @@ const ReceivedMessage = (req, res) => {
         const tarotReading = drawTarotCards();
         const tarotCardsArray = Object.values(tarotReading);
 
-        
+        const userRecord = await createUserInFirebase(number);
 
         let whatsappMessageCardImage;
         let whatsappMessageCardName;
