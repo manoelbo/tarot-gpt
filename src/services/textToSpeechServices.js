@@ -46,8 +46,8 @@ function textToSpeech(text) {
         console.error(error);
       });
     });
-    
-    const cleanedText = text.replace('tarot','tarô').replace('crush', 'crâaxhi').replace(/&#8203;``【oaicite:1】``&#8203;]+】/g, '').replace(/&#8203;``【oaicite:2】``&#8203;]+】/g, '');
+    var regex = /\d+†fonte/g;
+    const cleanedText = text.replace('tarot','tarô').replace('crush', 'crâaxhi').replace(regex, '').replace('【', '').replace('】', '');
     const postData =  "<speak version='1.0' xml:lang='en-US'>\n    <voice xml:lang='pt-BR' xml:gender='male' name='pt-BR-AntonioNeural'>\n"+cleanedText +"</voice>\n</speak>";
     
     req.write(postData);
