@@ -35,7 +35,27 @@ function formatToE164(phoneNumber) {
   return phoneNumber;
 }
 
+async function createUserOrUpdateUserRecord(uid, lastReading, evaluationScore, evaluationTimestamp) {
+  const db = admin.firestore();
+  try {
+      const userRef = db.collection('users').doc(uid);
+      await userRef.set({
+        last_reading: lastReading,
+        evaluation: {
+            score: evaluationScore,
+            timestamp: evaluationTimestamp
+        },
+      }, { merge: true });
+      
+      console.log(`User record updated for UID: ${uid}`);
+  } catch (error) {
+      console.error('Error updating user record:', error);
+      throw error;
+  }
+}
+
 module.exports = {
   createUserInFirebase,
+  createUserOrUpdateUserRecord,
   formatToE164,
 };
