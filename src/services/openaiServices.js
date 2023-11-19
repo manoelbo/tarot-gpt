@@ -73,7 +73,7 @@ async function waitRunToComplete(userThread, runThread) {
   console.log("🚀 ~ file: openaiServices.js:50 ~ waitRunToComplete ~ waitRunToComplete:", waitRunToComplete)
   let run = runThread;
   while (run.status !== "completed") {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 10000));
     console.log(run.status);
     run = await openai.beta.threads.runs.retrieve(userThread.id , run.id);
     if (run.status === "failed") {
