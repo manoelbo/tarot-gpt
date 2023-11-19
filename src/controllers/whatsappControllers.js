@@ -88,9 +88,10 @@ const ReceivedMessage = (req, res) => {
 async function sendChatGPTResponse(userText, tarotCardsArray, number) {
     try {
       const OpenAIText = await createThreadOpenAI(userText, tarotCardsArray);
-    //   const whatsappMessageStatus = samples.SampleText(number, OpenAIText);
-    //   SendMessageWhatsApp(whatsappMessageStatus);
-      sendTextToSpeechResponse(OpenAIText, number);
+
+    
+      separateTextAndSend(OpenAIText, number);
+
 
     } catch (error) {
       console.log(error);
@@ -98,6 +99,23 @@ async function sendChatGPTResponse(userText, tarotCardsArray, number) {
       SendMessageWhatsApp(whatsappMessageStatus);
     }
 }
+
+function separateTextAndSend(text, number) { 
+    const frase = "Zoltar fecha os olhos e, após um breve silêncio, começa a falar:";
+    const partes = text.split(frase);
+    let whatsappMessageStatus;
+
+    // Verifica se a frase existe no texto
+    if (partes.length > 1) {
+        whatsappMessageStatus = samples.SampleText(number, partes[0] + frase);
+        SendMessageWhatsApp(whatsappMessageStatus);
+        sendTextToSpeechResponse(partes[1], number);
+    } else {
+        whatsappMessageStatus = samples.SampleText(number, text);
+        SendMessageWhatsApp(whatsappMessageStatus);
+    }
+}
+
 
 async function sendTextToSpeechResponse(OpenAIText, number) {
     try {

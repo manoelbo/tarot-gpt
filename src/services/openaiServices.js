@@ -10,11 +10,32 @@ const openai = new openAI({
 async function createThreadOpenAI(question, cards) {
   try {
     console.log("🚀 ~ file: openaiServices.js:15 ~ createThreadOpenAI ~ createThreadOpenAI:", createThreadOpenAI)
-    let content = `${question}\n`;
-    cards.forEach((card, index) => {
-      
-      content += `carta ${index + 1}: ${card.name}\n`;
-    });
+    let content = `${question}\n\n`;
+    const cardA = cards[0].name;
+    const cardB = cards[1].name;
+    const cardC = cards[2].name;
+    
+    content += `carta A: ${cardA}\n`;
+    content += `carta B: ${cardB}\n`;
+    content += `carta C: ${cardC}\n`;
+    content += `\n`;
+    content += ` Siga exatamente o modelo abaixo para o roteiro:
+    
+    Zoltar abre seus olhos e direciona sua cabeça para a primeira carta. 
+    [Inserir o nome da carta ${cardA} aqui] 
+    [Inserir a descrição da carta ${cardA} e como ela pode estar relacionada à pergunta]
+
+    Zoltar então foca sua atenção na segunda carta. 
+    [Inserir o nome da carta ${cardB} aqui] 
+    [Inserir a descrição da carta ${cardB} e como ela pode estar relacionada à pergunta]
+
+    Agora, o tarólogo mecânico examina a terceira carta com um olhar profundo. 
+    [Inserir o nome da carta ${cardC} aqui] 
+    [Inserir a descrição da carta ${cardC} e como ela pode estar relacionada à pergunta] 
+
+    Zoltar fecha os olhos e, após um breve silêncio, começa a falar: 
+    [Inserir a narrativa que reponde minha pergunta de maneira poética e reflexiva]`;
+  
 
     console.log("🚀 ~ file: openaiServices.js:15 ~ createThreadOpenAI ~ content:", content);
     const userThread = await openai.beta.threads.create({
@@ -39,7 +60,7 @@ async function runThreadWithAssistent(userThread) {
     
     const runThread = await openai.beta.threads.runs.create(
       userThread.id,
-      { assistant_id: "asst_f1mkXd0SJfwlW3oJKDjE0P4H" }
+      { assistant_id: "asst_WX5qJ9n0C1ViFQGpdyZ7DqOa" }
     );
     return waitRunToComplete(userThread, runThread);
   } catch (error) {
@@ -61,6 +82,7 @@ async function waitRunToComplete(userThread, runThread) {
     }
   }
   if (run.status === "completed") {
+    console.log(run.status);
     return getMessageCreatedByRunOnThread(userThread, run);
   }
 }
@@ -76,7 +98,9 @@ async function getMessageCreatedByRunOnThread(userThread, completedRun){
           )
           .pop();
     if (lastMessageForRun) {
-      return lastMessageForRun.content[0].text.value;
+      var regex = /\d+†fonte/g;
+      const cleanedText = lastMessageForRun.content[0].text.value.replace('tarot','tarô').replace('crush', 'crâaxhi').replace(regex, '').replace('【', '').replace('】', '').replace('\u3010', '').replace('\u3011', '');
+      return cleanedText;
     } else {
       throw new Error('Nenhuma mensagem encontrada para a execução concluída');
     }
