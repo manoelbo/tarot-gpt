@@ -45,7 +45,5 @@ function drawTarotCards() {
     };
 }
 
-const tarot = drawTarotCards()
-
 module.exports = drawTarotCards;
 

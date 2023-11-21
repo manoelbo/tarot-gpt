@@ -3,6 +3,7 @@ const samples = require("../shared/sampleModels");
 const drawTarotCards = require("../services/tarotServices");
 const { createThreadOpenAI } = require("../services/openaiServices");
 const { textToSpeech } = require("../services/textToSpeechServices");
+const { createUserInFirebase, formatToE164, createUserOrUpdateUserRecord } = require("../services/firebaseUserServices");
 
 const VerifyToken = (req, res) => {
     try {
@@ -22,8 +23,7 @@ const VerifyToken = (req, res) => {
     }
 };
 
-
-const ReceivedMessage = (req, res) => {
+const ReceivedMessage = async(req, res) => {
     try {
 
         let entry = (req.body["entry"])[0];
@@ -37,7 +37,18 @@ const ReceivedMessage = (req, res) => {
         const tarotReading = drawTarotCards();
         const tarotCardsArray = Object.values(tarotReading);
 
-        
+        const formattedNumber = formatToE164(number);
+
+        await createUserInFirebase(formattedNumber);
+
+        const userRecord = await createUserInFirebase(formattedNumber);
+
+        const lastReadingTimestamp = Date.now(); 
+        const evaluationScore = 5; // Example evaluation score
+        const evaluationTimestamp = new Date().toISOString();
+
+        await createUserOrUpdateUserRecord(userRecord.uid, lastReadingTimestamp, evaluationScore, evaluationTimestamp);
+
 
         let whatsappMessageCardImage;
         let whatsappMessageCardName;
