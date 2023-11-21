@@ -9,7 +9,7 @@ const openai = new openAI({
 
 async function createThreadOpenAI(question, cards) {
   try {
-    console.log("🚀 ~ file: openaiServices.js:15 ~ createThreadOpenAI ~ createThreadOpenAI:", createThreadOpenAI)
+    // console.log("🚀 ~ file: openaiServices.js:15 ~ createThreadOpenAI ~ createThreadOpenAI:", createThreadOpenAI)
     let content = `${question}\n\n`;
     const cardA = cards[0].name;
     const cardB = cards[1].name;
@@ -37,7 +37,7 @@ async function createThreadOpenAI(question, cards) {
     [Inserir a narrativa que reponde minha pergunta de maneira poética e reflexiva]`;
   
 
-    console.log("🚀 ~ file: openaiServices.js:15 ~ createThreadOpenAI ~ content:", content);
+    // console.log("🚀 ~ file: openaiServices.js:15 ~ createThreadOpenAI ~ content:", content);
     const userThread = await openai.beta.threads.create({
       messages: [
         {
@@ -55,25 +55,31 @@ async function createThreadOpenAI(question, cards) {
 }
 
 async function runThreadWithAssistent(userThread) {
-  console.log("🚀 ~ file: openaiServices.js:35 ~ runThreadWithAssistent ~ runThreadWithAssistent:", runThreadWithAssistent)
-  try {
-    
-    const runThread = await openai.beta.threads.runs.create(
-      userThread.id,
-      { assistant_id: "asst_WX5qJ9n0C1ViFQGpdyZ7DqOa" }
-    );
-    return waitRunToComplete(userThread, runThread);
-  } catch (error) {
-    console.error(error);
-    throw new Error('Erro ao executar thread com assistente');
+  // console.log("🚀 ~ file: openaiServices.js:35 ~ runThreadWithAssistent ~ runThreadWithAssistent:", runThreadWithAssistent)
+  let maxAttempts = 3;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const runThread = await openai.beta.threads.runs.create(
+        userThread.id,
+        { assistant_id: "asst_WX5qJ9n0C1ViFQGpdyZ7DqOa" }
+      );
+      return waitRunToComplete(userThread, runThread);
+    } catch (error) {
+      console.error(`Tentativa ${attempt} falhou:`, error);
+      if (attempt === maxAttempts) {
+        throw new Error('Todas as tentativas de executar a thread com assistente falharam');
+      }
+    }
   }
 }
 
 async function waitRunToComplete(userThread, runThread) {
-  console.log("🚀 ~ file: openaiServices.js:50 ~ waitRunToComplete ~ waitRunToComplete:", waitRunToComplete)
+  // console.log("🚀 ~ file: openaiServices.js:50 ~ waitRunToComplete ~ waitRunToComplete:", waitRunToComplete)
+
+  
   let run = runThread;
   while (run.status !== "completed") {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     console.log(run.status);
     run = await openai.beta.threads.runs.retrieve(userThread.id , run.id);
     if (run.status === "failed") {
@@ -90,14 +96,17 @@ async function waitRunToComplete(userThread, runThread) {
 async function getMessageCreatedByRunOnThread(userThread, completedRun){
   
   try {
-    console.log("🚀 ~ file: openaiServices.js:67 ~ getMessageCreatedByRunOnThread ~ getMessageCreatedByRunOnThread:", getMessageCreatedByRunOnThread)
+    // console.log("🚀 ~ file: openaiServices.js:67 ~ getMessageCreatedByRunOnThread ~ getMessageCreatedByRunOnThread:", getMessageCreatedByRunOnThread)
     const messages = await openai.beta.threads.messages.list(userThread.id);
-    const lastMessageForRun = messages.data
-          .filter(
-            (message) => message.run_id === completedRun.id && message.role === "assistant"
-          )
-          .pop();
-    if (lastMessageForRun) {
+    
+    // const lastMessageForRun = messages.data
+    //       .filter(
+    //         (message) => message.run_id === completedRun.id && message.role === "assistant"
+    //       )
+    //       .pop();
+    const lastMessageForRun = messages.data[0];
+    console.log("🚀 ~ file: openaiServices.js:67 ~ getMessageCreatedByRunOnThread ~ lastMessageForRun:", lastMessageForRun)
+    if (lastMessageForRun && lastMessageForRun.role === "assistant") {
       var regex = /\d+†fonte/g;
       const cleanedText = lastMessageForRun.content[0].text.value.replace('tarot','tarô').replace('crush', 'crâaxhi').replace(regex, '').replace('【', '').replace('】', '').replace('\u3010', '').replace('\u3011', '');
       return cleanedText;
