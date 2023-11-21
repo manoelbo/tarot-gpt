@@ -48,7 +48,7 @@ const ReceivedMessage = async(req, res) => {
         const evaluationTimestamp = new Date().toISOString();
 
         await createUserOrUpdateUserRecord(userRecord.uid, lastReadingTimestamp, evaluationScore, evaluationTimestamp);
-
+        
 
         let whatsappMessageCardImage;
         let whatsappMessageCardName;
