@@ -43,9 +43,9 @@ const ReceivedMessage = async(req, res) => {
 
         const userRecord = await createUserInFirebase(formattedNumber);
 
-        const lastReadingTimestamp = Date.now(); 
-        const evaluationScore = 5; // Example evaluation score
-        const evaluationTimestamp = new Date().toISOString();
+        let lastReadingTimestamp = Date.now(); 
+        let evaluationScore =  ""
+        let evaluationTimestamp = "";
 
         await createUserOrUpdateUserRecord(userRecord.uid, lastReadingTimestamp, evaluationScore, evaluationTimestamp);
         
@@ -102,7 +102,7 @@ async function sendChatGPTResponse(userText, tarotCardsArray, number) {
 
     
       separateTextAndSend(OpenAIText, number);
-
+      sendEvaluation(number);
 
     } catch (error) {
       console.log(error);
@@ -127,17 +127,27 @@ function separateTextAndSend(text, number) {
     }
 }
 
-
 async function sendTextToSpeechResponse(OpenAIText, number) {
     try {
         const audioUrl = await textToSpeech(OpenAIText);
         const audioMessage = samples.SampleAudio(number, audioUrl);
         SendMessageWhatsApp(audioMessage);
-        
     } catch (error) {
         console.log(error);
     }
-} 
+}
+
+async function sendEvaluation(number) {
+    try {
+        let whatsappMessageStatus = samples.SampleEvaluation(
+            number,
+            "Dê uma nota de 1 a 5 para o Zoltar"
+        );
+        SendMessageWhatsApp(whatsappMessageStatus);
+    } catch (error) {
+        console.error("Error sending evaluation message:", error);
+    }
+}
 
 module.exports = {
   VerifyToken,
