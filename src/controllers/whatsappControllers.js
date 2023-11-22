@@ -82,7 +82,7 @@ const ReceivedMessage = async(req, res) => {
             }, 15000);
 
             if (userText.includes("⭐")) {
-                evaluationScore = userText
+                evaluationScore = Number(userText)
                 evaluationTimestamp = new Date().toISOString();
             
                 await createUserOrUpdateUserRecord(
