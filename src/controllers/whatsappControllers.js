@@ -96,20 +96,47 @@ const ReceivedMessage = async(req, res) => {
   }
 };
 
-async function sendChatGPTResponse(userText, tarotCardsArray, number) {
-    try {
-      const OpenAIText = await createThreadOpenAI(userText, tarotCardsArray);
+async function sendChatGPTResponse(userText, tarotCardsArray, number, maxAttempts = 3) {
+    let attempt = 0;
+    let errorOccurred;
 
-    
-      separateTextAndSend(OpenAIText, number);
-
-
-    } catch (error) {
-      console.log(error);
-      const whatsappMessageStatus = samples.SampleText(number, "Ocorreu um erro ao consultar o Zoltar. Por favor, tente novamente.");
-      SendMessageWhatsApp(whatsappMessageStatus);
+    while (attempt < maxAttempts) {
+        try {
+            const OpenAIText = await createThreadOpenAI(userText, tarotCardsArray);
+            separateTextAndSend(OpenAIText, number);
+            errorOccurred = false;
+            break; // Se for bem-sucedido, sai do loop
+        } catch (error) {
+            errorOccurred = true;
+            console.log(`Tentativa ${attempt + 1} falhou:`, error);
+            attempt++;
+        }
+    }
+    if (errorOccurred) {
+        if (attempt >= maxAttempts) {
+            const whatsappMessageStatus = samples.SampleText(number, "Infelizmente, os servidores estão sobrecarregados e não conseguimos consultar o Zoltar. Por favor, tente novamente mais tarde. Lembre-se, você ainda tem direito à sua pergunta do dia.");
+            SendMessageWhatsApp(whatsappMessageStatus);
+        } else {
+            const whatsappMessageStatus = samples.SampleText(number, "Zoltar está pensando... Aguarde mais alguns minutos.");
+            SendMessageWhatsApp(whatsappMessageStatus);
+        } 
     }
 }
+
+// async function sendChatGPTResponse(userText, tarotCardsArray, number) {
+//     try {
+//       const OpenAIText = await createThreadOpenAI(userText, tarotCardsArray);
+
+    
+//       separateTextAndSend(OpenAIText, number);
+
+
+//     } catch (error) {
+//       console.log(error);
+//       const whatsappMessageStatus = samples.SampleText(number, "Ocorreu um erro ao consultar o Zoltar. Por favor, tente novamente.");
+//       SendMessageWhatsApp(whatsappMessageStatus);
+//     }
+// }
 
 function separateTextAndSend(text, number) { 
     const frase = "Zoltar fecha os olhos e, após um breve silêncio, começa a falar:";
