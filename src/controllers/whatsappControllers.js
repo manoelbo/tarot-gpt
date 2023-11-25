@@ -43,9 +43,9 @@ const ReceivedMessage = async(req, res) => {
 
         const userRecord = await createUserInFirebase(formattedNumber);
 
-        const lastReadingTimestamp = Date.now(); 
-        const evaluationScore = 5; // Example evaluation score
-        const evaluationTimestamp = new Date().toISOString();
+        let lastReadingTimestamp = Date.now(); 
+        let evaluationScore =  ""
+        let evaluationTimestamp = "";
 
         await createUserOrUpdateUserRecord(userRecord.uid, lastReadingTimestamp, evaluationScore, evaluationTimestamp);
         
@@ -81,6 +81,18 @@ const ReceivedMessage = async(req, res) => {
                 SendMessageWhatsApp(whatsappMessageStatus);
             }, 15000);
 
+            if (userText.includes("⭐")) {
+                evaluationScore = Number(userText)
+                evaluationTimestamp = new Date().toISOString();
+            
+                await createUserOrUpdateUserRecord(
+                    userRecord.uid,
+                    lastReadingTimestamp,
+                    evaluationScore,
+                    evaluationTimestamp
+                );
+            }        
+
         } else {
             whatsappMessageStatus = samples.SampleText(number,  "Olá,\n\nSeja bem-vindo(a) ao *Zoltar Tarot IA*.\nSomos uma maneira acessível de você consultar a sabedoria do Tarot.\n\n*Como funciona?:*\nPara fazer um consultar, é só você enviar uma mensagem que começa com 'pergunta:' \n\n*Exemplos:*\npergunta: Porque o meu crush parou de falar comigo?\npergunta: No que preciso prestar atenção nessa semana?\npergunta: Como vai ser o meu mês de outubro?\n\nDepois de enviar a sua pergunta corretamente, o Zoltar vai separa três cartas e relacionar o que saiu com a sua pergunta.\n\n*AVISO IMPORTANTE [1]:*\nVocê tem o direito de consultar o Zoltar apenas uma vez por dia. \n\nPortanto, pense cuidadosamente na pergunta que deseja fazer.\n\n*AVISO IMPORTANTE [2]:*\nSua perguntas são 100% privadas e não são armazenadas em nosso banco de dados.");
             SendMessageWhatsApp(whatsappMessageStatus);
@@ -100,6 +112,7 @@ async function sendChatGPTResponse(userText, tarotCardsArray, number, maxAttempt
     let attempt = 0;
     let errorOccurred;
 
+<<<<<<< HEAD
     while (attempt < maxAttempts) {
         try {
             const OpenAIText = await createThreadOpenAI(userText, tarotCardsArray);
@@ -120,6 +133,16 @@ async function sendChatGPTResponse(userText, tarotCardsArray, number, maxAttempt
             const whatsappMessageStatus = samples.SampleText(number, "Zoltar está pensando... Aguarde mais alguns minutos.");
             SendMessageWhatsApp(whatsappMessageStatus);
         } 
+=======
+    
+      separateTextAndSend(OpenAIText, number);
+      sendEvaluation(number);
+
+    } catch (error) {
+      console.log(error);
+      const whatsappMessageStatus = samples.SampleText(number, "Ocorreu um erro ao consultar o Zoltar. Por favor, tente novamente.");
+      SendMessageWhatsApp(whatsappMessageStatus);
+>>>>>>> evaluation
     }
 }
 
@@ -154,17 +177,27 @@ function separateTextAndSend(text, number) {
     }
 }
 
-
 async function sendTextToSpeechResponse(OpenAIText, number) {
     try {
         const audioUrl = await textToSpeech(OpenAIText);
         const audioMessage = samples.SampleAudio(number, audioUrl);
         SendMessageWhatsApp(audioMessage);
-        
     } catch (error) {
         console.log(error);
     }
-} 
+}
+
+async function sendEvaluation(number) {
+    try {
+        let whatsappMessageStatus = samples.SampleEvaluation(
+            number,
+            "Dê uma nota de 1 a 5 para o Zoltar"
+        );
+        SendMessageWhatsApp(whatsappMessageStatus);
+    } catch (error) {
+        console.error("Error sending evaluation message:", error);
+    }
+}
 
 module.exports = {
   VerifyToken,
