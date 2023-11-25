@@ -112,7 +112,6 @@ async function sendChatGPTResponse(userText, tarotCardsArray, number, maxAttempt
     let attempt = 0;
     let errorOccurred;
 
-<<<<<<< HEAD
     while (attempt < maxAttempts) {
         try {
             const OpenAIText = await createThreadOpenAI(userText, tarotCardsArray);
@@ -133,16 +132,6 @@ async function sendChatGPTResponse(userText, tarotCardsArray, number, maxAttempt
             const whatsappMessageStatus = samples.SampleText(number, "Zoltar está pensando... Aguarde mais alguns minutos.");
             SendMessageWhatsApp(whatsappMessageStatus);
         } 
-=======
-    
-      separateTextAndSend(OpenAIText, number);
-      sendEvaluation(number);
-
-    } catch (error) {
-      console.log(error);
-      const whatsappMessageStatus = samples.SampleText(number, "Ocorreu um erro ao consultar o Zoltar. Por favor, tente novamente.");
-      SendMessageWhatsApp(whatsappMessageStatus);
->>>>>>> evaluation
     }
 }
 
