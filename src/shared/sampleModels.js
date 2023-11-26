@@ -34,7 +34,9 @@ function SampleAudio(number, path){
   return data;
 }
 
-function SampleEvaluation(number, text) {
+function SampleEvaluation(number, readingRef) {
+  const feedback_yes = `feedback_yes_${readingRef}`;
+  const feedback_no = `feedback_no_${readingRef}`;
   const data = JSON.stringify({
     "messaging_product": "whatsapp",
     "to": number,
@@ -42,45 +44,24 @@ function SampleEvaluation(number, text) {
     "interactive": {
       "type": "button",
       "body": {
-        "text": text,
+        "text": "Você gostou da sua experiência com o Zoltar?",
       },
       "action": {
         "buttons": [
           {
             "type": "reply",
             "reply": {
-              "id": "5_stars",
-              "title": "5 ⭐⭐⭐⭐⭐"
+              "id": feedback_yes,
+              "title": "Sim 👍"
             }
           },
           {
             "type": "reply",
             "reply": {
-              "id": "4_stars",
-              "title": "4 ⭐⭐⭐⭐"
+              "id": feedback_no,
+              "title": "Não 👎"
             }
-          },
-          {
-            "type": "reply",
-            "reply": {
-              "id": "3_stars",
-              "title": "3 ⭐⭐⭐"
-            }
-          },
-          {
-            "type": "reply",
-            "reply": {
-              "id": "2_stars",
-              "title": "2 ⭐⭐"
-            }
-          },
-          {
-            "type": "reply",
-            "reply": {
-              "id": "1_star",
-              "title": "1 ⭐"
-            }
-          },
+          }
         ]
       }
     }

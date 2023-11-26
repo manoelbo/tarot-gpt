@@ -3,7 +3,7 @@ const samples = require("../shared/sampleModels");
 const drawTarotCards = require("../services/tarotServices");
 const { createThreadOpenAI } = require("../services/openaiServices");
 const { textToSpeech } = require("../services/textToSpeechServices");
-const { createUserInFirebase, formatToE164, createUserOrUpdateUserRecord } = require("../services/firebaseUserServices");
+const { getUserInFirebase, formatToE164, checkDailyCradit, addNewReading, updateReadingStatus, updateReadingFeedback } = require("../services/firebaseUserServices");
 
 const VerifyToken = (req, res) => {
     try {
@@ -25,109 +25,187 @@ const VerifyToken = (req, res) => {
 
 const ReceivedMessage = async(req, res) => {
     try {
-
         let entry = (req.body["entry"])[0];
         let changes = (entry["changes"])[0];
         let value = (changes["value"]);
         let messageObject = value["messages"];
         let messages = messageObject[0];
         let number = messages["from"];
-        let userText = messages.text.body;
+        let userMessage = processMessage(messages);
+        let whatsappMessageStatus;
+    
+        if (userMessage.toLowerCase().startsWith("pergunta:")) {
 
+            // handle user
+            const formattedNumber = formatToE164(number);
+            const userRecord = await getUserInFirebase(formattedNumber);
+            const dailyCraditResponse = await checkDailyCradit(userRecord.uid);
+
+            // check daily cradit
+            if (dailyCraditResponse.on_hold) {
+                whatsappMessageStatus = samples.SampleText(number, `Você já fez a sua pergunta do dia. Você precisa esperar *${dailyCraditResponse.hours} horas e ${dailyCraditResponse.minutes} minutos.*`);
+                SendMessageWhatsApp(whatsappMessageStatus);
+            } else {
+                // add new reading
+                const readingRef = await addNewReading(userRecord.uid);
+               
+                
+                // sort cards
+                const tarotReading = drawTarotCards();
+                const tarotCardsArray = Object.values(tarotReading);
+                let whatsappMessageCardImage;
+                let whatsappMessageCardName;
+
+                // send cards
+                tarotCardsArray.forEach((card, index) => {
+                    setTimeout(() => {
+                        whatsappMessageCardImage = samples.SampleImage(number, card.image);
+                        whatsappMessageCardName = samples.SampleText(number, card.name);
+                        SendMessageWhatsApp(whatsappMessageCardName);
+                        SendMessageWhatsApp(whatsappMessageCardImage);
+                    }, 3000 * (index + 1));          
+                });
+
+                  // enviar mensagem de status
+                    whatsappMessageStatus = samples.SampleText(number, "Zoltar está tirando as cartas");
+                    SendMessageWhatsApp(whatsappMessageStatus);
+            
+                    // enviar pergunta e cartas para o GPT-3
+                    sendChatGPTResponse(userMessage, tarotCardsArray, number, userRecord, readingRef);
+                   
+                    // eviar mesagem de status
+                    setTimeout(() => {
+                        whatsappMessageStatus = samples.SampleText(number, "Zoltar está pensando... Aguarde alguns minutos.");
+                        SendMessageWhatsApp(whatsappMessageStatus);
+                    }, 15000); 
+            }
+            
+          
+        } else if (userMessage.toLowerCase().startsWith("feedback_")) {
+            let feedback;
+            let readingRef;
+            // sprit feedback by "_
+            const feedbackRef = userMessage.split("_");
+            feedback = feedbackRef[1];
+            readingRef = feedbackRef[2];
+
+            updateReadingFeedback(readingRef, feedback);
+            whatsappMessageStatus = samples.SampleText(number, "Muito obrigado pelo feedback! Se você quiser contribuir ainda mais com nosso projeto, você pode responder nosso formulário de pesquisa: https://forms.gle/HxyPEQiDPwHfQqzK7")
+            SendMessageWhatsApp(whatsappMessageStatus);
+
+
+        } else if (userMessage.toLowerCase().startsWith("teste")) {
+            const formattedNumber = formatToE164(number);
+            const userRecord = await getUserInFirebase(formattedNumber);
+            const dailyCraditResponse = await checkDailyCradit(userRecord.uid);
+            
+            if (dailyCraditResponse.on_hold) {
+                whatsappMessageStatus = samples.SampleText(number, `Você já fez a sua pergunta do dia. Você precisa esperar *${dailyCraditResponse.hours} horas e ${dailyCraditResponse.minutes} minutos.*`);
+                SendMessageWhatsApp(whatsappMessageStatus);
+            }
+
+        } else if (userMessage.toLowerCase().startsWith("admin:")) {
+        // handle user
+        const formattedNumber = formatToE164(number);
+        const userRecord = await getUserInFirebase(formattedNumber);
+
+        // add new reading
+        const readingRef = await addNewReading(userRecord.uid);
+        
+        // sort cards
         const tarotReading = drawTarotCards();
         const tarotCardsArray = Object.values(tarotReading);
-
-        const formattedNumber = formatToE164(number);
-
-        await createUserInFirebase(formattedNumber);
-
-        const userRecord = await createUserInFirebase(formattedNumber);
-
-        let lastReadingTimestamp = Date.now(); 
-        let evaluationScore =  ""
-        let evaluationTimestamp = "";
-
-        await createUserOrUpdateUserRecord(userRecord.uid, lastReadingTimestamp, evaluationScore, evaluationTimestamp);
-        
-
         let whatsappMessageCardImage;
         let whatsappMessageCardName;
-        let whatsappMessageStatus;
 
-        if (userText.toLowerCase().startsWith("pergunta:")) {
-            // enviar mensagem de status
+        // send cards
+        tarotCardsArray.forEach((card, index) => {
+            setTimeout(() => {
+                whatsappMessageCardImage = samples.SampleImage(number, card.image);
+                whatsappMessageCardName = samples.SampleText(number, card.name);
+                SendMessageWhatsApp(whatsappMessageCardName);
+                SendMessageWhatsApp(whatsappMessageCardImage);
+            }, 3000 * (index + 1));          
+        });
+
+        // enviar mensagem de status
             whatsappMessageStatus = samples.SampleText(number, "Zoltar está tirando as cartas");
             SendMessageWhatsApp(whatsappMessageStatus);
 
-            // enviar mensagem de pergunta para chatGPT 
-
-              
-            // Chame a função com os argumentos apropriados
-            sendChatGPTResponse(userText, tarotCardsArray, number);
-            // sortear e enviar cartas
-            tarotCardsArray.forEach((card, index) => {
-
-                setTimeout(() => {
-                    whatsappMessageCardImage = samples.SampleImage(number, card.image);
-                    whatsappMessageCardName = samples.SampleText(number, card.name);
-                    SendMessageWhatsApp(whatsappMessageCardName);
-                    SendMessageWhatsApp(whatsappMessageCardImage);
-                }, 3000 * (index + 1));
-                
-            });
-
+            // enviar pergunta e cartas para o GPT-3
+            sendChatGPTResponse(userMessage, tarotCardsArray, number, userRecord, readingRef);
+        
+            // eviar mesagem de status
             setTimeout(() => {
                 whatsappMessageStatus = samples.SampleText(number, "Zoltar está pensando... Aguarde alguns minutos.");
                 SendMessageWhatsApp(whatsappMessageStatus);
-            }, 15000);
-
-            if (userText.includes("⭐")) {
-                evaluationScore = Number(userText)
-                evaluationTimestamp = new Date().toISOString();
-            
-                await createUserOrUpdateUserRecord(
-                    userRecord.uid,
-                    lastReadingTimestamp,
-                    evaluationScore,
-                    evaluationTimestamp
-                );
-            }        
-
+            }, 15000); 
         } else {
-            whatsappMessageStatus = samples.SampleText(number,  "Olá,\n\nSeja bem-vindo(a) ao *Zoltar Tarot IA*.\nSomos uma maneira acessível de você consultar a sabedoria do Tarot.\n\n*Como funciona?:*\nPara fazer um consultar, é só você enviar uma mensagem que começa com 'pergunta:' \n\n*Exemplos:*\npergunta: Porque o meu crush parou de falar comigo?\npergunta: No que preciso prestar atenção nessa semana?\npergunta: Como vai ser o meu mês de outubro?\n\nDepois de enviar a sua pergunta corretamente, o Zoltar vai separa três cartas e relacionar o que saiu com a sua pergunta.\n\n*AVISO IMPORTANTE [1]:*\nVocê tem o direito de consultar o Zoltar apenas uma vez por dia. \n\nPortanto, pense cuidadosamente na pergunta que deseja fazer.\n\n*AVISO IMPORTANTE [2]:*\nSua perguntas são 100% privadas e não são armazenadas em nosso banco de dados.");
+            const introText = `🌟 *Bem-vindo(a) ao Zoltar Tarot IA* 🌟
+
+Embarque em uma jornada mística com o Zoltar, seu guia no universo enigmático do Tarot. 
+Aqui, cada carta revela um fragmento do destino, e cada leitura é um passo em sua jornada pessoal de descoberta.
+
+*Como iniciar sua consulta?* 🌙
+
+_Envie uma mensagem começando com 'pergunta:'_.
+
+Exemplos de mensagens:
+pergunta: Qual o segredo por trás do silêncio do meu crush?
+pergunta: Que sabedoria devo buscar nesta semana?
+pergunta: Quais serão meus obstáculos em 2024?
+
+Ao enviar sua pergunta, Zoltar, com olhos de oráculo, selecionará três cartas do Tarot, tecendo suas respostas com uso de inteligência artificial.
+
+*Lei do Oráculo [1]:* 🌌
+Você pode consultar o Zoltar uma vez ao dia. Use esse poder com sabedoria.
+
+*Lei do Oráculo [2]:* 🌠
+Seus segredos são sagrados aqui. 
+Suas perguntas são envoltas em sigilo, não deixando rastros em nosso santuário digital.
+
+Que as cartas do tarot te ajudem em sua jornada.
+
+💫💫💫`;
+            whatsappMessageStatus = samples.SampleText(number,  introText);
             SendMessageWhatsApp(whatsappMessageStatus);
         }
-
-       
-
-
-
     res.send("EVENT_RECEIVED");
   } catch (e) {
+    console.log(e);
     res.send("EVENT_RECEIVED");
   }
 };
 
-async function sendChatGPTResponse(userText, tarotCardsArray, number, maxAttempts = 3) {
+async function sendChatGPTResponse(userMessage, tarotCardsArray, number, userRecord, readingRef, maxAttempts = 3) {
     let attempt = 0;
     let errorOccurred;
+    let error_log;
 
     while (attempt < maxAttempts) {
         try {
-            const OpenAIText = await createThreadOpenAI(userText, tarotCardsArray);
-            separateTextAndSend(OpenAIText, number);
+            const OpenAIText = await createThreadOpenAI(userMessage, tarotCardsArray);
+            separateTextAndSend(OpenAIText, number, userRecord, readingRef);
             errorOccurred = false;
             break; // Se for bem-sucedido, sai do loop
         } catch (error) {
             errorOccurred = true;
-            console.log(`Tentativa ${attempt + 1} falhou:`, error);
+        console.log(`Tentativa ${attempt + 1} falhou:`, error);
+            error_log = error;
             attempt++;
         }
     }
     if (errorOccurred) {
         if (attempt >= maxAttempts) {
-            const whatsappMessageStatus = samples.SampleText(number, "Infelizmente, os servidores estão sobrecarregados e não conseguimos consultar o Zoltar. Por favor, tente novamente mais tarde. Lembre-se, você ainda tem direito à sua pergunta do dia.");
+            // send error message to user 
+            const error_msg = "Infelizmente, os servidores estão sobrecarregados e não conseguimos consultar o Zoltar. Por favor, tente novamente mais tarde. Lembre-se, você ainda tem direito à sua pergunta do dia.";
+            const whatsappMessageStatus = samples.SampleText(number, error_msg);
             SendMessageWhatsApp(whatsappMessageStatus);
+
+            // update reading status
+            await updateReadingStatus(readingRef, 'error', error_log);
+
+            throw new Error(error_msg);
         } else {
             const whatsappMessageStatus = samples.SampleText(number, "Zoltar está pensando... Aguarde mais alguns minutos.");
             SendMessageWhatsApp(whatsappMessageStatus);
@@ -135,22 +213,7 @@ async function sendChatGPTResponse(userText, tarotCardsArray, number, maxAttempt
     }
 }
 
-// async function sendChatGPTResponse(userText, tarotCardsArray, number) {
-//     try {
-//       const OpenAIText = await createThreadOpenAI(userText, tarotCardsArray);
-
-    
-//       separateTextAndSend(OpenAIText, number);
-
-
-//     } catch (error) {
-//       console.log(error);
-//       const whatsappMessageStatus = samples.SampleText(number, "Ocorreu um erro ao consultar o Zoltar. Por favor, tente novamente.");
-//       SendMessageWhatsApp(whatsappMessageStatus);
-//     }
-// }
-
-function separateTextAndSend(text, number) { 
+function separateTextAndSend(text, number, userRecord, readingRef) { 
     const frase = "Zoltar fecha os olhos e, após um breve silêncio, começa a falar:";
     const partes = text.split(frase);
     let whatsappMessageStatus;
@@ -159,33 +222,68 @@ function separateTextAndSend(text, number) {
     if (partes.length > 1) {
         whatsappMessageStatus = samples.SampleText(number, partes[0] + frase);
         SendMessageWhatsApp(whatsappMessageStatus);
-        sendTextToSpeechResponse(partes[1], number);
+        sendTextToSpeechResponse(partes[1], number, userRecord, readingRef);
+
     } else {
         whatsappMessageStatus = samples.SampleText(number, text);
         SendMessageWhatsApp(whatsappMessageStatus);
+        // update reading status
+        updateReadingStatus(readingRef, 'error', 'Não foi possível separar a frase do texto');
     }
 }
 
-async function sendTextToSpeechResponse(OpenAIText, number) {
+async function sendTextToSpeechResponse(OpenAIText, number, userRecord, readingRef) {
     try {
         const audioUrl = await textToSpeech(OpenAIText);
         const audioMessage = samples.SampleAudio(number, audioUrl);
-        SendMessageWhatsApp(audioMessage);
+        let whatsappMessageStatus
+
+        SendMessageWhatsApp(audioMessage);        
+        // update reading status
+        updateReadingStatus(readingRef, 'complete');
+
+        // send status message
+        setTimeout(() => {
+            whatsappMessageStatus = samples.SampleText(number, `Espero que tenha gostado da sua consulta e que as cartas guiem você em sua jornada.`);
+            SendMessageWhatsApp(whatsappMessageStatus);
+        }, 10000);
+
+          // send status message
+        setTimeout(() => {
+            whatsappMessageStatus = samples.SampleEvaluation(number, readingRef);
+            SendMessageWhatsApp(whatsappMessageStatus);
+        }, 11000);
+
+
     } catch (error) {
         console.log(error);
     }
 }
 
-async function sendEvaluation(number) {
-    try {
-        let whatsappMessageStatus = samples.SampleEvaluation(
-            number,
-            "Dê uma nota de 1 a 5 para o Zoltar"
-        );
-        SendMessageWhatsApp(whatsappMessageStatus);
-    } catch (error) {
-        console.error("Error sending evaluation message:", error);
+
+function processMessage(messages) {
+    var text = "";
+    var typeMessge = messages["type"];
+    if(typeMessge == "text"){
+        text = (messages["text"])["body"];
     }
+    else if(typeMessge == "interactive"){
+
+        var interactiveObject = messages["interactive"];
+        var typeInteractive = interactiveObject["type"];
+        
+        if(typeInteractive == "button_reply"){
+            text = (interactiveObject["button_reply"])["id"];
+        }
+        else if(typeInteractive == "list_reply"){
+            text = (interactiveObject["list_reply"])["id"];
+        }else{
+            console.log("sem mensagem");
+        }
+    }else {
+        console.log("sem mensagem");
+    }
+    return text;
 }
 
 module.exports = {

@@ -93,7 +93,7 @@ async function waitRunToComplete(userThread, runThread) {
   }
 }
 
-async function getMessageCreatedByRunOnThread(userThread, completedRun){
+async function getMessageCreatedByRunOnThread(userThread){
   
   try {
     // console.log("🚀 ~ file: openaiServices.js:67 ~ getMessageCreatedByRunOnThread ~ getMessageCreatedByRunOnThread:", getMessageCreatedByRunOnThread)
