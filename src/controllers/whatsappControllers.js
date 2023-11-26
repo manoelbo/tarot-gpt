@@ -147,7 +147,7 @@ const ReceivedMessage = async(req, res) => {
                 whatsappMessageStatus = samples.SampleText(number, "Zoltar está pensando... Aguarde alguns minutos.");
                 SendMessageWhatsApp(whatsappMessageStatus);
             }, 15000); 
-        } else {
+        } else if (userMessage.length > 0) {
             const introText = `🌟 *Bem-vindo(a) ao Zoltar Tarot IA* 🌟
 
 Embarque em uma jornada mística com o Zoltar, seu guia no universo enigmático do Tarot. 
