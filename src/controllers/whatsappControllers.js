@@ -31,7 +31,7 @@ const ReceivedMessage = async(req, res) => {
         let messageObject = value["messages"];
         let messages;
         let number;
-        let userMessage;
+        let userMessage = '';
         let whatsappMessageStatus;
 
         if(typeof messageObject != "undefined"){
