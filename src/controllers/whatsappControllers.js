@@ -29,10 +29,17 @@ const ReceivedMessage = async(req, res) => {
         let changes = (entry["changes"])[0];
         let value = (changes["value"]);
         let messageObject = value["messages"];
-        let messages = messageObject[0];
-        let number = messages["from"];
-        let userMessage = processMessage(messages);
+        let messages;
+        let number;
+        let userMessage;
         let whatsappMessageStatus;
+
+        if(typeof messageObject != "undefined"){
+            messages = messageObject[0];
+            number = messages["from"];
+            userMessage = processMessage(messages);
+        }        
+
     
         if (userMessage.toLowerCase().startsWith("pergunta:")) {
 
